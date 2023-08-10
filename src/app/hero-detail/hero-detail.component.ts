@@ -1,8 +1,9 @@
-import { Component ,Input } from '@angular/core';
-import { Hero }  from "../hero";
-import { HeroService } from "../hero.service";
-import { Location } from "@angular/common";
+import {Component, Input} from '@angular/core';
+import {Hero} from "../hero";
+import {HeroService} from "../hero.service";
+import {DatePipe, Location} from "@angular/common";
 import {ActivatedRoute} from "@angular/router";
+import {FormBuilder, FormGroup, Validators} from "@angular/forms";
 
 @Component({
   selector: 'app-hero-detail',
@@ -11,27 +12,60 @@ import {ActivatedRoute} from "@angular/router";
 })
 export class HeroDetailComponent {
   hero ?: Hero;
+  heroForm: FormGroup | undefined;
+
   constructor(
     private route: ActivatedRoute,
     private heroService: HeroService,
-    private location: Location
-  ) {}
+    private location: Location,
+    private fb: FormBuilder,
+    private datePipe: DatePipe
+  ) {
+  }
 
-  ngOnInit():void{
+  ngOnInit(): void {
     this.getHero();
-  }
-  getHero():void{
-    const id = Number(this.route.snapshot.paramMap.get('id'));
-    this.heroService.getHero(id).subscribe(hero => this.hero = hero)
+    this.initForm();
   }
 
-  goBack():void{
+  initForm(): void {
+    this.heroForm = this.fb.group({
+      id: [''],
+      name: ['', Validators.required],
+      dateOfBirth: ['', Validators.required],
+      description: ['', Validators.required]
+    });
+  }
+
+  getHero(): void {
+    const id = Number(this.route.snapshot.paramMap.get('id'));
+    this.heroService.getHero(id).subscribe(hero => {
+      this.hero = hero;
+
+      const formattedDate = this.datePipe.transform(this.hero.dateOfBirth, 'yyyy-MM-dd');
+      this.heroForm?.patchValue({
+        id: this.hero.id,
+        dateOfBirth:formattedDate,
+        name: this.hero.name,
+        description: this.hero.description
+      })
+
+    });
+  }
+
+  goBack(): void {
     this.location.back();
   }
 
-  save(): void {
-    if (this.hero) {
-      this.heroService.updateHero(this.hero)
+  onSubmit() {
+    const {id} = this.heroForm?.value;
+
+
+    if (this.heroForm?.invalid) {
+      return;
+    }
+    if (id) {
+      this.heroService.updateHero({...this.heroForm?.value} as Hero)
         .subscribe(() => this.goBack());
     }
   }

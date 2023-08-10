@@ -1,10 +1,26 @@
 <button type="button" (click)="goBack()">go back</button>
-<div *ngIf="hero">
-  <h2>{{hero.name | uppercase}} Details</h2>
-  <div>id: {{hero.id}}</div>
-  <div>
-    <label for="hero-name">Hero name: </label>
-    <input id="hero-name" [(ngModel)]="hero.name" placeholder="name">
-  </div>
+<div *ngIf="heroForm">
+
+  <h2>{{hero?.name | uppercase}} Details</h2>
+
+  <form [formGroup]="heroForm" (ngSubmit)="onSubmit()">
+
+
+    <div>
+      <label for="hero-name">Hero name: </label>
+      <input id="hero-name" placeholder="name" formControlName="name" >
+    </div>
+
+    <div>
+      <label for="hero-date-of-birth">Hero Date Of Birth: </label>
+      <input id="hero-date-of-birth" type="date" placeholder="date of birth" formControlName="dateOfBirth" >
+    </div>
+
+    <div>
+      <label for="hero-description">Hero Description: </label>
+      <input id="hero-description" placeholder="description" formControlName="description" >
+    </div>
+    <button type="submit" [disabled]="heroForm?.invalid">Submit</button>
+  </form>
+
 </div>
-<button type="button" (click)="save()">save</button>

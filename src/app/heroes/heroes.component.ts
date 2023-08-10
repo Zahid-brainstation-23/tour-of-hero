@@ -1,8 +1,8 @@
-import { Component } from '@angular/core';
-import { Hero }  from "../hero";
+import {Component} from '@angular/core';
+import {Hero} from "../hero";
 import {HeroService} from "../hero.service";
 import {MessageService} from "../message.service";
-
+import {FormBuilder, Validators} from "@angular/forms";
 
 
 @Component({
@@ -13,9 +13,16 @@ import {MessageService} from "../message.service";
 
 export class HeroesComponent {
 
-  heroes:Hero[]=[];
+  heroes: Hero[] = [];
 
-  constructor(private heroService:HeroService){
+
+  heroForm = this.fb.group({
+    name: ['', Validators.required],
+    dateOfBirth: ['', Validators.required],
+    description: ['', Validators.required]
+  });
+
+  constructor(private heroService: HeroService, private fb: FormBuilder) {
   }
 
 
@@ -23,14 +30,20 @@ export class HeroesComponent {
     this.heroService.getHeroes()
       .subscribe(heroes => this.heroes = heroes);
   }
+
   ngOnInit(): void {
     this.getHeroes();
   }
 
-  add(name: string): void {
-    name = name.trim();
-    if (!name) { return; }
-    this.heroService.addHero({ name } as Hero)
+  onSubmit(): void {
+
+    var name = this.heroForm.value.name?.trim();
+    var dateOfBirth: Date = <Date><any>this.heroForm.value.dateOfBirth;
+    var description = this.heroForm.value.description?.trim();
+    if (!name || !dateOfBirth || !description) {
+      return;
+    }
+    this.heroService.addHero({ name, dateOfBirth, description} as Hero)
       .subscribe(hero => {
         this.heroes.push(hero);
       });

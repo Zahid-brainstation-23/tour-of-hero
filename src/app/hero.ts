@@ -1,4 +1,7 @@
 export  interface  Hero{
-  id:number;
+  id: number;
   name:string;
+  dateOfBirth:Date;
+  description:string;
+
 }
